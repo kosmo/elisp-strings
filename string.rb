@@ -12,6 +12,14 @@ class String
     end
     return nil
   end
+
+  def search_backward_regexp(regex)
+    if _r = self.rindex(regex, self.point - 1)
+      self.point = _r
+      return self.point
+    end
+    return nil
+  end
   
 
 
