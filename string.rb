@@ -5,6 +5,10 @@ class String
     return @point || 0
   end
 
+  def match_data
+    return @match_data || nil
+  end
+
   def search_forward_regexp(regex, limit = nil)
     if limit
       _string_to_search = self.dup.slice(0, limit)
@@ -13,6 +17,7 @@ class String
     end
 
     if _m = _string_to_search.match(regex, self.point)
+      @match_data = _m
       self.point = _m.end(0)
       return self.point
     end
@@ -40,6 +45,11 @@ class String
     @point = _point
     return c
   end
+
+  def match_string(group)
+    return @match_data[group]
+  end
+
 
 
 end
