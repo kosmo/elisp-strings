@@ -27,7 +27,19 @@ class String
     end
     return nil
   end
-  
+
+  def line_number
+    _point = @point
+    @point = 0
+
+    c = 0
+    while self.search_forward_regexp(/\n/, _point) do
+      c += 1
+    end
+
+    @point = _point
+    return c
+  end
 
 
 end
