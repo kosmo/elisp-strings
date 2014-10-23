@@ -5,12 +5,19 @@ class String
     return @point || 0
   end
 
-  def search_forward_regexp(regex)
-    if _m = self.match(regex, self.point)
+  def search_forward_regexp(regex, limit = nil)
+    if limit
+      _string_to_search = self.dup.slice(0, limit)
+    else
+      _string_to_search = self.dup
+    end
+
+    if _m = _string_to_search.match(regex, self.point)
       self.point = _m.end(0)
       return self.point
     end
     return nil
+
   end
 
   def search_backward_regexp(regex)
