@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class String
   attr_accessor :point
 
@@ -51,5 +52,88 @@ class String
   end
 
 
+  def point_in_math_tex
+    return true if self.point_in_equation_tex
+    return true if self.point_in_inlineequation_tex
+    return false
+  end
 
+  def point_in_inlineequation_tex
+    org_point = self.point
+    self.search_backward_regexp(/\n\s*\n/)
+    substring = self.slice(point..org_point)
+    substring.gsub!(/\\\$/, '')
+
+    n = 0
+    while substring.search_forward_regexp(/\$/)
+      n += 1
+    end
+
+    self.point = org_point
+
+    return true if n.odd?
+    return false
+  end
+
+  def point_in_equation_tex
+    org_point = self.point
+    begin_equation = 0
+    end_equation = 0
+  
+    substring = self.slice(0..org_point)
+    while substring.search_forward_regexp(/\\begin{(equation|align(?:at)?|multline|gather|eqnarray)[*]?}/)
+      begin_equation += 1
+    end
+
+    substring.point = 0
+
+    while substring.search_forward_regexp(/\\end{(equation|align(?:at)?|multline|gather|eqnarray)[*]?}/)
+      end_equation += 1
+    end
+
+    return true if begin_equation > end_equation
+    return false
+
+    self.point = org_point
+  end
+
+  def point_in_tex_command(tex_command)
+    org_point = self.point
+    
+    if self.search_backward_regexp(/\\#{tex_command}(\\[[^]]*\\])*{/)
+	  (goto-char (match-end 0))
+	  (if (< stelle (end-of-curly-bracket))
+
+
+	      (setq back t)
+	    (setq back nil)
+	    )
+	  )
+      (setq back nil)
+      )
+    ))
+)
+    self.point = org_point
+  end
+
+
+
+  def end_of_curly_bracket
+    org_point = self.point
+    
+    curly_bracket_stack = 1
+
+    while (curly_bracket_stack != 0)
+      self.search_forward_regexp(/({|})/)
+      if self.match_string(1) == "{"
+        curly_bracket_stack += 1
+      else
+	curly_bracket_stack -= 1
+      end
+    end
+    self.point = org_point
+
+    
+  end
+  
 end
