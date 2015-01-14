@@ -136,6 +136,20 @@ class String
     return rv
   end
 
+  def point_in_tex_command_third_argument(tex_command)
+    org_point = self.point
+    rv = false
+    
+    if self.search_backward_regexp(/\\#{tex_command}(\\[[^\]]*\\])*{^[}]*}{^[}]*}{/)
+      self.point = self.match_data.end(0)
+      rv = true if org_point < self.end_of_curly_bracket
+    end
+
+    self.point = org_point
+
+    return rv
+  end
+
   def point_in_tex_environment(environment)
     current_point = self.point
     begin_env = 0
