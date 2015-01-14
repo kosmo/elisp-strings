@@ -27,11 +27,18 @@ class String
   end
 
   def search_backward_regexp(regex)
-    if _r = self.rindex(regex, self.point - 1)
-      self.point = _r
+    if _m = self.to_enum(:scan, regex).map{Regexp.last_match}.last
+      @match_data = _m
+      self.point = _m.end(0)
       return self.point
     end
     return nil
+
+    # if _r = self.rindex(regex, self.point - 1)
+    #   self.point = _r
+    #   return self.point
+    # end
+    # return nil
   end
 
   def line_number
@@ -59,20 +66,24 @@ class String
   end
 
   def point_in_inlineequation_tex
-    org_point = self.point
-    self.search_backward_regexp(/\n\s*\n/)
-    substring = self.slice(point..org_point)
-    substring.gsub!(/\\\$/, '')
+    rv = false
+    self.save_excursion do
+      substring = self.slice(0..point)
+      substring.gsub!(/\\\$/, '')
 
-    n = 0
-    while substring.search_forward_regexp(/\$/)
-      n += 1
+      n = 0
+      while substring.search_forward_regexp(/\$/)
+        n += 1
+      end
+      
+      if n.odd?
+        rv = true 
+      else
+        rv = false
+      end
     end
-
-    self.point = org_point
-
-    return true if n.odd?
-    return false
+    
+    return rv
   end
 
   def point_in_equation_tex
@@ -99,23 +110,65 @@ class String
 
   def point_in_tex_command(tex_command)
     org_point = self.point
+    rv = false
     
-    if self.search_backward_regexp(/\\#{tex_command}(\\[[^]]*\\])*{/)
-	  (goto-char (match-end 0))
-	  (if (< stelle (end-of-curly-bracket))
+    if self.search_backward_regexp(/\\#{tex_command}(\\[[^\]]*\\])*{/)
+      self.point = self.match_data.end(0)
+      rv = true if org_point < self.end_of_curly_bracket
+    end
 
-
-	      (setq back t)
-	    (setq back nil)
-	    )
-	  )
-      (setq back nil)
-      )
-    ))
-)
     self.point = org_point
+
+    return rv
   end
 
+  def point_in_tex_command_second_argument(tex_command)
+    org_point = self.point
+    rv = false
+    
+    if self.search_backward_regexp(/\\#{tex_command}(\\[[^\]]*\\])*{^[}]*}{/)
+      self.point = self.match_data.end(0)
+      rv = true if org_point < self.end_of_curly_bracket
+    end
+
+    self.point = org_point
+
+    return rv
+  end
+
+  def point_in_tex_environment(environment)
+    current_point = self.point
+    begin_env = 0
+    end_env = 0
+    back = false
+
+    self.save_excursion do
+      self.point = 0
+      self.save_excursion do
+        while self.search_forward_regexp(/\\begin{#{environment}}/, current_point)
+          begin_env += 1
+        end
+      end
+
+      self.save_excursion do 
+        while self.search_forward_regexp(/\\end{#{environment}}/, current_point)
+          end_env += 1
+        end
+      end
+      
+      if begin_env > end_env
+        back = true
+      end
+    end
+
+    return back
+  end
+
+  def save_excursion(&block)
+    org_point = self.point
+    yield
+    self.point = org_point
+  end
 
 
   def end_of_curly_bracket
@@ -131,9 +184,11 @@ class String
 	curly_bracket_stack -= 1
       end
     end
-    self.point = org_point
 
-    
+    end_point = self.point
+    self.point = org_point
+  
+    return end_point
   end
   
 end
