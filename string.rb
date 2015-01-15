@@ -27,29 +27,29 @@ class String
   end
 
   def search_backward_regexp(regex)
-    if _m = self.to_enum(:scan, regex).map{Regexp.last_match}.last
-      @match_data = _m
-      self.point = _m.end(0)
-      return self.point
-    end
-    return nil
-
-    # if _r = self.rindex(regex, self.point - 1)
-    #   self.point = _r
+    # if _m = self.to_enum(:scan, regex).map{Regexp.last_match}.last
+    #   @match_data = _m
+    #   self.point = _m.end(0)
     #   return self.point
     # end
     # return nil
+
+    if _r = self.rindex(regex, self.point - 1)
+      self.point = _r
+      return self.point
+    end
+    return nil
   end
 
   def line_number
     _point = @point
     @point = 0
-
+    
     c = 0
     while self.search_forward_regexp(/\n/, _point) do
       c += 1
     end
-
+    
     @point = _point
     return c
   end
@@ -112,13 +112,15 @@ class String
     org_point = self.point
     rv = false
     
-    if self.search_backward_regexp(/\\#{tex_command}(\\[[^\]]*\\])*{/)
-      self.point = self.match_data.end(0)
-      rv = true if org_point < self.end_of_curly_bracket
+    self.save_excursion do
+      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{/)
+        self.point = self.match_data.end(0)
+        rv = true if org_point < self.end_of_curly_bracket
+      end
     end
 
+    #puts "rv: #{rv} org_point: #{org_point} tex_command: #{tex_command}"
     self.point = org_point
-
     return rv
   end
 
@@ -126,7 +128,7 @@ class String
     org_point = self.point
     rv = false
     
-    if self.search_backward_regexp(/\\#{tex_command}(\\[[^\]]*\\])*{^[}]*}{/)
+    if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{/)
       self.point = self.match_data.end(0)
       rv = true if org_point < self.end_of_curly_bracket
     end
@@ -140,7 +142,7 @@ class String
     org_point = self.point
     rv = false
     
-    if self.search_backward_regexp(/\\#{tex_command}(\\[[^\]]*\\])*{^[}]*}{^[}]*}{/)
+    if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{^[}]*}{/)
       self.point = self.match_data.end(0)
       rv = true if org_point < self.end_of_curly_bracket
     end
@@ -206,3 +208,4 @@ class String
   end
   
 end
+
