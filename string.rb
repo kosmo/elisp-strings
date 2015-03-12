@@ -186,24 +186,24 @@ class String
     self.point = org_point
   end
 
-
   def end_of_curly_bracket
-    org_point = self.point
-    
-    curly_bracket_stack = 1
-
-    while (curly_bracket_stack != 0)
-      self.search_forward_regexp(/({|})/)
-      if self.match_string(1) == "{"
-        curly_bracket_stack += 1
-      else
-	curly_bracket_stack -= 1
-      end
-    end
-
     end_point = self.point
-    self.point = org_point
-  
+
+    self.save_excursion do
+      curly_bracket_stack = 1
+      
+      while (curly_bracket_stack != 0)
+        self.search_forward_regexp(/({|})/)
+        if self.match_string(1) == "{"
+          curly_bracket_stack += 1
+        else
+          curly_bracket_stack -= 1
+        end
+      end
+      
+      end_point = self.point
+    end
+    
     return end_point
   end
   
