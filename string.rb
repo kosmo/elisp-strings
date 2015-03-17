@@ -17,13 +17,14 @@ class String
       _string_to_search = self.dup
     end
 
+    #puts regex
+
     if _m = _string_to_search.match(regex, self.point)
       @match_data = _m
       self.point = _m.end(0)
       return self.point
     end
     return nil
-
   end
 
   def search_backward_regexp(regex)
@@ -113,8 +114,9 @@ class String
     rv = false
     
     self.save_excursion do
-      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{/)
-        self.point = self.match_data.end(0)
+      if tex_command_start = self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{/)
+        self.point = tex_command_start
+        self.search_forward_regexp("{")
         rv = true if org_point < self.end_of_curly_bracket
       end
     end
@@ -128,12 +130,12 @@ class String
     org_point = self.point
     rv = false
     
-    if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{/)
-      self.point = self.match_data.end(0)
-      rv = true if org_point < self.end_of_curly_bracket
+    self.save_excursion do
+      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{/)
+        self.point = self.match_data.end(0)
+        rv = true if org_point < self.end_of_curly_bracket
+      end
     end
-
-    self.point = org_point
 
     return rv
   end
@@ -142,12 +144,12 @@ class String
     org_point = self.point
     rv = false
     
-    if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{^[}]*}{/)
-      self.point = self.match_data.end(0)
-      rv = true if org_point < self.end_of_curly_bracket
+    self.save_excursion do
+      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{^[}]*}{/)
+        self.point = self.match_data.end(0)
+        rv = true if org_point < self.end_of_curly_bracket
+      end
     end
-
-    self.point = org_point
 
     return rv
   end
