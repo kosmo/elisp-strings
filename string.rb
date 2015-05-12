@@ -35,7 +35,12 @@ class String
     # end
     # return nil
 
-    if _r = self.rindex(regex, self.point - 1)
+    if _r = self.rindex(regex, self.point)
+      if _m = self.match(regex, _r - 1)
+        @match_data = _m
+        self.point = _m.end(0)
+        return self.point
+      end
       self.point = _r
       return self.point
     end
