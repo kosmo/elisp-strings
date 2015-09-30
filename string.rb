@@ -122,7 +122,7 @@ class String
       if tex_command_start = self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{/)
         self.point = tex_command_start
         self.search_forward_regexp("{")
-        rv = true if org_point < self.end_of_curly_bracket
+        rv = true if org_point <= self.end_of_curly_bracket
       end
     end
 
