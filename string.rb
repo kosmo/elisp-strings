@@ -114,6 +114,37 @@ class String
     self.point = org_point
   end
 
+  def point_in_superscript(debug = false)
+    org_point = self.point
+    rv = false
+    
+    self.save_excursion do
+      if tex_command_start = self.search_backward_regexp(/^{/)
+        self.point = tex_command_start
+        puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{tex_command_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket}) " if debug
+        rv = true if org_point <= self.end_of_curly_bracket
+      end
+    end
+    self.point = org_point
+    return rv
+  end
+
+  def point_in_subscript(debug = false)
+    org_point = self.point
+    rv = false
+    
+    self.save_excursion do
+      if tex_command_start = self.search_backward_regexp(/_{/)
+        self.point = tex_command_start
+        puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{tex_command_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket}) " if debug
+        rv = true if org_point <= self.end_of_curly_bracket
+      end
+    end
+    self.point = org_point
+    return rv
+  end
+
+  
   def point_in_tex_command(tex_command, debug = false)
     org_point = self.point
     rv = false
@@ -212,6 +243,71 @@ class String
     
     return end_point
   end
+
+  def end_of_quoted_curly_bracket
+    end_point = self.point
+
+    self.save_excursion do
+      curly_bracket_stack = 1
+      
+      while (curly_bracket_stack != 0)
+        self.search_forward_regexp(/(\\\{|\\\})/)
+        if self.match_string(1) == "\\{"
+          curly_bracket_stack += 1
+        else
+          curly_bracket_stack -= 1
+        end
+      end
+      
+      end_point = self.point
+    end
+    
+    return end_point
+  end
+
+  
+  def end_of_parenthesis
+    end_point = self.point
+
+    self.save_excursion do
+      curly_bracket_stack = 1
+      
+      while (curly_bracket_stack != 0)
+        self.search_forward_regexp(/(\(|\))/)
+        if self.match_string(1) == "("
+          curly_bracket_stack += 1
+        else
+          curly_bracket_stack -= 1
+        end
+      end
+      
+      end_point = self.point
+    end
+    
+    return end_point
+  end
+
+  def end_of_bracket
+    end_point = self.point
+
+    self.save_excursion do
+      curly_bracket_stack = 1
+      
+      while (curly_bracket_stack != 0)
+        self.search_forward_regexp(/(\[|\])/)
+        if self.match_string(1) == "["
+          curly_bracket_stack += 1
+        else
+          curly_bracket_stack -= 1
+        end
+      end
+      
+      end_point = self.point
+    end
+    
+    return end_point
+  end
+
   
 end
 
