@@ -119,7 +119,7 @@ class String
     rv = false
     
     self.save_excursion do
-      if tex_command_start = self.search_backward_regexp(/^{/)
+      if tex_command_start = self.search_backward_regexp(/\^{/)
         self.point = tex_command_start
         puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{tex_command_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket}) " if debug
         rv = true if org_point <= self.end_of_curly_bracket
