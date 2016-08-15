@@ -180,7 +180,7 @@ class String
     rv = false
     
     self.save_excursion do
-      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{^[}]*}{^[}]*}{/)
+      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{[^}]*}{[^}]*}{/)
         self.point = self.match_data.end(0)
         rv = true if org_point < self.end_of_curly_bracket
       end
