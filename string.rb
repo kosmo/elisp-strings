@@ -35,7 +35,7 @@ class String
     # end
     # return nil
 
-    if _r = self.rindex(regex, self.point)
+    if _r = self.rindex(regex, self.point-1)
       if _m = self.match(regex, _r - 1)
         @match_data = _m
         self.point = _m.end(0)
@@ -150,14 +150,13 @@ class String
     rv = false
     
     self.save_excursion do
-      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{/)
+      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*/)
         tex_command_start = self.search_forward_regexp(/\{/)
         puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{tex_command_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket}) " if debug
         rv = true if org_point <= self.end_of_curly_bracket
       end
     end
 
-    #puts "rv: #{rv} org_point: #{org_point} tex_command: #{tex_command}"
     self.point = org_point
     return rv
   end
@@ -171,14 +170,13 @@ class String
         rv = true if org_point < self.end_of_curly_bracket
       end
     end
-    
     return rv
   end
 
   def point_in_tex_command_third_argument(tex_command)
     org_point = self.point
     rv = false
-    
+
     self.save_excursion do
       if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{[^}]*}{[^}]*}{/)
         self.point = self.match_data.end(0)
