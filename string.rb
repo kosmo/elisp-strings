@@ -74,8 +74,8 @@ class String
   def point_in_inlineequation_tex
     rv = false
     self.save_excursion do
-      substring = self.slice(0..point - 1)
-      substring.gsub!(/\\\$/, '')
+      substring = self.slice(0..point - 1)    
+      substring.gsub!(/(?<!\\)\\\$/, '')
 
       n = 0
       while substring.search_forward_regexp(/\$/)
