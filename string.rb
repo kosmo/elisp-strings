@@ -166,8 +166,10 @@ class String
     rv = false
     
     self.save_excursion do
-      # if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*{[^}]*}{/)    
-      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*({[^}]*}+)/)
+      if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*/)
+        self.point += 1
+        self.point = self.end_of_curly_bracket
+      
         tex_command_second_argument_start = self.search_forward_regexp(/\{/)
         puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{ tex_command_second_argument_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket})" if debug
         rv = true if org_point < self.end_of_curly_bracket
