@@ -17,8 +17,6 @@ class String
       _string_to_search = self.dup
     end
 
-    #puts regex
-
     if _m = _string_to_search.match(regex, self.point)
       @match_data = _m
       self.point = _m.end(0)
@@ -51,7 +49,7 @@ class String
     _point = @point
     @point = 0
     
-    c = 0
+    c = 1
     while self.search_forward_regexp(/\n/, _point) do
       c += 1
     end
