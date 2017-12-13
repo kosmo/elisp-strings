@@ -71,8 +71,7 @@ class String
   end
 
   def point_in_math_tex_or_lscience
-    rv = self.point_in_math_tex
-    return true if rv
+    return true if self.point_in_math_tex
     return self.point_in_lscience   
   end
     
