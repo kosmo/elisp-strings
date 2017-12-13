@@ -70,18 +70,45 @@ class String
     return false
   end
 
+  def point_in_math_tex_or_lscience
+    rv = self.point_in_math_tex
+    return true if rv
+    return self.point_in_lscience   
+  end
+    
+
+  def point_in_lscience
+    return true if self.point_in_tex_command("val")
+    return true if self.point_in_tex_command("percentval")
+    return true if self.point_in_tex_command("degval")
+    return true if self.point_in_tex_command("chem")    
+    
+    return true if self.point_in_tex_command("valunit")
+    return true if self.point_in_tex_command_second_argument("valunit")
+    
+    return true if self.point_in_tex_command("valrange")
+    return true if self.point_in_tex_command_second_argument("valrange")
+
+    return true if self.point_in_tex_command("percentvalrange")
+    return true if self.point_in_tex_command_second_argument("percentvalrange")
+
+    return true if self.point_in_tex_command("valrangeunit")
+    return true if self.point_in_tex_command_second_argument("valrangeunitvalrange")
+    return true if self.point_in_tex_command_third_argument("valrangeunitvalrange")
+  end  
+
   def point_in_inlineequation_tex
     rv = false
     self.save_excursion do
       self.save_match_data do
         substring = self.slice(0..point - 1)    
         substring.gsub!(/(?<!\\)\\\$/, '')
-
+        
         n = 0
         while substring.search_forward_regexp(/\$/)
           n += 1
         end
-      
+        
         if n.odd?
           rv = true 
         else
