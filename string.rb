@@ -196,7 +196,7 @@ class String
     
     self.save_excursion do
       self.save_match_data do
-        if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*/)
+        if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*(?=\{)/)
           self.point += 1
           self.point = self.end_of_curly_bracket
       
@@ -360,6 +360,15 @@ class String
     return end_point
   end
 
+
+  def jump_back_one_paragraph
+    end_point = self.point
+    self.search_backward_regexp(/(\n\s*\n)+/)
+    
+    
+    
+    return end_point
+  end
   
 end
 
