@@ -125,13 +125,13 @@ class String
     end_equation = 0
   
     substring = self.slice(0..org_point)
-    while substring.search_forward_regexp(/\\begin{(equation|align(?:at)?|multline|gather|eqnarray)[*]?}/)
+    while substring.search_forward_regexp(/\\begin[[:space:]]*{(equation|align(?:at)?|multline|gather|eqnarray)[*]?}/)
       begin_equation += 1
     end
 
     substring.point = 0
 
-    while substring.search_forward_regexp(/\\end{(equation|align(?:at)?|multline|gather|eqnarray)[*]?}/)
+    while substring.search_forward_regexp(/\\end[[:space:]]*{(equation|align(?:at)?|multline|gather|eqnarray)[*]?}/)
       end_equation += 1
     end
 
