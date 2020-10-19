@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+require "yaml"
+
 class String
   attr_accessor :point
   attr_accessor :match_data
+  attr_accessor :inline_equation_ranges
 
   def point
     return @point || 0
@@ -9,6 +12,10 @@ class String
 
   def match_data
     return @match_data || nil
+  end
+
+  def inline_equation_ranges
+    return @inline_equation_ranges || nil
   end
 
   def search_forward_regexp(regex, limit = nil)
@@ -97,26 +104,51 @@ class String
   end  
 
   def point_in_inlineequation_tex
-    rv = false
-    self.save_excursion do
-      self.save_match_data do
-        substring = self.slice(0..point - 1)    
-        substring.gsub!(/(?<!\\)\\\$/, '')
+    set_inline_equation_ranges unless @inline_equation_ranges
+
+    return true if @inline_equation_ranges.include?(self.point)
+    return false
+    
+    # rv = false
+    # self.save_excursion do
+    #   self.save_match_data do
+    #     substring = self.slice(0..point - 1)    
+    #     substring.gsub!(/(?<!\\)\\\$/, '')
         
-        n = 0
-        while substring.search_forward_regexp(/\$/)
-          n += 1
-        end
+    #     n = 0
+    #     while substring.search_forward_regexp(/\$/)
+    #       n += 1
+    #     end
         
-        if n.odd?
-          rv = true 
-        else
-          rv = false
-        end
+    #     if n.odd?
+    #       rv = true 
+    #     else
+    #       rv = false
+    #     end
+    #   end
+    # end
+    
+    # return rv
+
+    
+  end
+
+  def set_inline_equation_ranges
+    string = self.dup
+    ranges = []
+
+    string.point = 0
+    string.gsub!(/(?<!\\)\\\$/, '')
+    n = 0
+    while string.search_forward_regexp(/\$/)
+      n += 1
+
+      if n.odd?
+        ranges << string.point
       end
     end
-    
-    return rv
+      
+    self.inline_equation_ranges = ranges
   end
 
   def point_in_equation_tex
