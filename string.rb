@@ -5,11 +5,21 @@ class String
   attr_accessor :point
   attr_accessor :match_data
   attr_accessor :inline_equation_ranges
+  attr_accessor :language
+  attr_accessor :ce_level
 
   def point
     return @point || 0
   end
 
+  def language
+    return @language
+  end
+
+  def ce_level
+    return @ce_level
+  end
+  
   def match_data
     return @match_data || nil
   end
