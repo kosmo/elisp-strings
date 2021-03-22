@@ -118,29 +118,6 @@ class String
 
     return true if @inline_equation_ranges.include?(self.point)
     return false
-    
-    # rv = false
-    # self.save_excursion do
-    #   self.save_match_data do
-    #     substring = self.slice(0..point - 1)    
-    #     substring.gsub!(/(?<!\\)\\\$/, '')
-        
-    #     n = 0
-    #     while substring.search_forward_regexp(/\$/)
-    #       n += 1
-    #     end
-        
-    #     if n.odd?
-    #       rv = true 
-    #     else
-    #       rv = false
-    #     end
-    #   end
-    # end
-    
-    # return rv
-
-    
   end
 
   def set_inline_equation_ranges
@@ -150,14 +127,14 @@ class String
     string.point = 0
     string.gsub!(/(?<!\\)\\\$/, '  ')
     n = 0
-    while string.search_forward_regexp(/\$/)
-      n += 1
-
-      if n.odd?
-        ranges << string.point
-      end
+    point = 0
+    
+    for char in string.chars do
+      n += 1 if "$" == char
+      ranges << point if n.odd?
+      point += 1
     end
-      
+
     self.inline_equation_ranges = ranges
   end
 
@@ -214,20 +191,24 @@ class String
   end
 
   
-  def point_in_tex_command(tex_command, debug = false)
+  def point_in_tex_command(tex_commands, debug = false)
     org_point = self.point
     rv = false
-    
-    self.save_excursion do
-      self.save_match_data do
-        if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*(?=\{)/)
-          tex_command_start = self.search_forward_regexp(/\{/)
-          puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{tex_command_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket})" if debug
-          rv = true if org_point <= self.end_of_curly_bracket
+
+    tex_commands = [tex_commands] unless tex_commands.is_a?(Array)
+
+    for tex_command in tex_commands do
+      self.save_excursion do
+        self.save_match_data do
+          if self.search_backward_regexp(/\\#{tex_command}(\[[^\]]*\])*(?=\{)/)
+            tex_command_start = self.search_forward_regexp(/\{/)
+            puts "|#{self.slice(self.point..self.end_of_curly_bracket)}| (#{tex_command_start} #{org_point} <= #{self.end_of_curly_bracket} #{org_point <= self.end_of_curly_bracket})" if debug
+            rv = true if org_point <= self.end_of_curly_bracket
+          end
         end
       end
     end
-
+    
     self.point = org_point
     return rv
   end
