@@ -7,7 +7,8 @@ class String
   attr_accessor :inline_equation_ranges
   attr_accessor :language
   attr_accessor :ce_level
-
+  attr_accessor :fulltext_xml
+  
   def point
     return @point || 0
   end
@@ -18,6 +19,10 @@ class String
 
   def ce_level
     return @ce_level
+  end
+
+  def fulltext_xml
+    return @fulltext_xml
   end
   
   def match_data
