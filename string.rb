@@ -120,7 +120,7 @@ class String
 
   def point_in_inlineequation_tex
     set_inline_equation_ranges unless @inline_equation_ranges
-
+ 
     return true if @inline_equation_ranges.include?(self.point)
     return false
   end
@@ -135,8 +135,8 @@ class String
     point = 0
     
     for char in string.chars do
-      n += 1 if "$" == char
       ranges << point if n.odd?
+      n += 1 if "$" == char
       point += 1
     end
 
