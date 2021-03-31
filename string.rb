@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 require "yaml"
+require "set"
 
 class String
   attr_accessor :point
   attr_accessor :match_data
   attr_accessor :inline_equation_ranges
+  attr_accessor :equation_ranges
   attr_accessor :language
   attr_accessor :ce_level
   attr_accessor :fulltext_xml
+  attr_accessor :only_equations
   
   def point
     return @point || 0
@@ -33,6 +36,16 @@ class String
     return @inline_equation_ranges || nil
   end
 
+  def equation_ranges
+    return @equation_ranges || nil
+  end
+  
+  def only_equations
+    set_only_equations unless @only_equations
+    return @only_equations
+  end
+  
+  
   def search_forward_regexp(regex, limit = nil)
     if limit
       _string_to_search = self.dup.slice(0, limit)
@@ -143,6 +156,47 @@ class String
     self.inline_equation_ranges = ranges
   end
 
+
+  def set_equation_ranges
+    ranges = []
+    
+    while self.search_forward_regexp(/\\begin[[:space:]]*{(equation|align(?:at)?|aligned|multline|gather|eqnarray)[*]?}/) do
+      eq_start = self.match_data.begin(0)
+      env =  self.match_string(1)
+      
+      if self.search_forward_regexp(/\\end[[:space:]]*{#{env}[*]?}/)
+       
+        eq_end = self.match_data.end(0)
+        for char in (eq_start..eq_end).to_a do
+          ranges << char
+        end
+      end
+    end
+
+    self.equation_ranges = ranges
+  end
+
+
+  def set_only_equations
+    s = ""
+    equation_ranges = Set.new((self.equation_ranges + self.inline_equation_ranges).flatten)
+    
+    point = 0
+    
+    for char in self.chars do
+      if equation_ranges.include?(point)
+        s += char
+      elsif "\n" == char
+        s += char
+      else
+        s += " "
+      end
+      point += 1
+    end
+
+    @only_equations = s
+  end
+  
   def point_in_equation_tex
     org_point = self.point
     begin_equation = 0
@@ -393,10 +447,11 @@ class String
     end_point = self.point
     self.search_backward_regexp(/(\n\s*\n)+/)
     
-    
-    
     return end_point
   end
+
+
   
 end
+
 
